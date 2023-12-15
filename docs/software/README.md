@@ -361,6 +361,8 @@ Insert into mydb.category (name, description, Post_id, Category_id) Values
 
 ## create webserver with Fastify from index.ts
 
+Створюється вебсервер за допомогою фреймворка "Fastify". Для цього імпортуються усі необхідні бібліотеки та запускається веб-сервер на вказаному порті. У разі помилки виводиться повідомлення про помилку, в іншому виводить адресу, на якій працює сервер. 
+
 ```ts
 import fastify, { FastifyInstance } from 'fastify';
 import * as dotenv from 'dotenv';
@@ -385,6 +387,8 @@ app.listen({
 
 ## createPool from mysql.ts
 
+Ця частина коду створює пул з'єднань до бази даних MySQL, для того щоб взаємодіяти з базою даних.
+
 ```ts
 const pool = mysql.createPool({
     user:       "root",
@@ -396,7 +400,11 @@ const pool = mysql.createPool({
 
 ## all our controllers files for routes
 
+Цей набір контролерів наведені нижче, відповідають за виконання конкретних запитів (наприклад, видалення за ідентифікатором, отримання списку організацій тощо) на веб-сервері через знову ж таки фреймворк Fastify та HTTP-запити, котрі наочно можна побачити у коді.
+
 ### organizationsDeleteByld.ts
+
+Задача відповідно цього контролера обробляти запити на видалення організації за ідентифікатором.
 
 ```ts
 import { FastifyReply, FastifyRequest } from "fastify";
@@ -418,6 +426,8 @@ export default organizationsDeleteHandle;
 
 ### organizationsDeleteFromList.ts
 
+Цей контролер відповідає за обробку запитів на видалення організації зі списку за ідентифікатором.
+
 ```ts
 import { FastifyReply, FastifyRequest } from "fastify";
 import { IIdParams } from "../types";
@@ -438,6 +448,8 @@ export default organizationsDeleteFromListHandle;
 
 ### organizationsGetAll.ts
 
+Контролер для отримання списку всіх організацій.
+
 ```ts
 import { FastifyReply, FastifyRequest } from "fastify";
 import { getMySQLAllOrganizations } from "../mysql";
@@ -453,6 +465,8 @@ export default organizationsGetAllHandle;
 ```
 
 ### organizationsGetByld.ts
+
+Контролер для отримання конкретної організації за ідентифікатором. 
 
 ```ts
 import { FastifyReply, FastifyRequest } from "fastify";
@@ -514,6 +528,8 @@ export default organizationsGetListByIdHandle;
 
 ### organizationsPost.ts
 
+Цей контролер відповідає за обробку запитів на додавання нової організації.
+
 ```ts
 import { FastifyReply, FastifyRequest } from "fastify";
 import { insertMySQLOrganization } from "../mysql";
@@ -562,6 +578,8 @@ export default organizationsPostHandle;
 
 ## our routes from organizations.ts
 
+Визначення маршрутів для нашого веб-сервера за допомогою фреймворка Fastify.
+
 ```ts
 import { FastifyInstance } from "fastify";
 import {
@@ -598,6 +616,8 @@ export default organizationsRoutes;
 
 ## execute queries from mysql.ts
 
+Ця частина кода призначена для виконання SQL-запитів до бази даних через пул з'єднань.
+
 ```ts
 const executeQuery = async (querStr: string) => {
     try {
@@ -614,6 +634,8 @@ const executeQuery = async (querStr: string) => {
 ```
 
 ## all MySQL queries from mysql.ts
+
+Задача даних функцій доволі проста - формування SQL-запитів та передача їх до `executeQuery` для виконання.
 
 ```ts
 export const getMySQLAllOrganizations = async (): Promise<IMysqlReturn> => {
