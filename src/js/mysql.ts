@@ -4,6 +4,7 @@ import { IMysqlReturn, IPostParams, IUpdateParamrs } from './types';
 const pool = mysql.createPool({
     user:       "root",
     password:   "password1234566qew",
+    port:       3306,
     database:   "mydb",
     host:       "localhost"
 });
@@ -23,21 +24,21 @@ const executeQuery = async (querStr: string) => {
 
 export const getMySQLAllOrganizations = async (): Promise<IMysqlReturn> => {
     const queryString = `
-        SELECT * FROM organizations
+        SELECT * FROM Organizations
     `;
     return executeQuery(queryString);
 };
 
 export const getMySQLAllOrganizationsList = async (): Promise<IMysqlReturn> => {
     const queryString = `
-        SELECT * FROM organization_list
+        SELECT * FROM Organization_list
     `;
     return executeQuery(queryString);
 };
 
 export const getMySQLOrganizationsList = async (id: number): Promise<IMysqlReturn> => {
     const queryString = `
-        SELECT * FROM organization_list_has_organizations
+        SELECT * FROM Organization_list_has_Organizations
         WHERE Organization_list_id = ${id}
     `;
     return executeQuery(queryString);
@@ -45,14 +46,14 @@ export const getMySQLOrganizationsList = async (id: number): Promise<IMysqlRetur
 
 export const getMySQLOrganization = async (id: number): Promise<IMysqlReturn> => {
     const queryString = `
-        SELECT * FROM organizations WHERE id = ${id}
+        SELECT * FROM Organizations WHERE id = ${id}
     `;
     return executeQuery(queryString);
 };
 
 export const insertMySQLOrganization = async ({ name, description }: IPostParams) => {
     const queryString = `
-        INSERT INTO organizations (name, description)
+        INSERT INTO Organizations (name, description)
         VALUES ('${name}', ${description ? `'${description}'` : null})
     `;
     return executeQuery(queryString);
@@ -60,7 +61,7 @@ export const insertMySQLOrganization = async ({ name, description }: IPostParams
 
 export const updateMySQLOrganization = async ({ id, name, description }: IUpdateParamrs) => {
     const queryString = `
-        UPDATE organizations
+        UPDATE Organizations
         SET name = '${name}'${description ? `, description = '${description}'` : ''}
         WHERE id = ${parseInt(id)}
     `;
@@ -69,7 +70,7 @@ export const updateMySQLOrganization = async ({ id, name, description }: IUpdate
 
 export const deleteMySQLOrganization = async (id: number) => {
     const queryString = `
-        DELETE FROM organizations
+        DELETE FROM Organizations
         WHERE id = ${id}
     `;
     return executeQuery(queryString);
@@ -77,7 +78,7 @@ export const deleteMySQLOrganization = async (id: number) => {
 
 export const deleteMySQLOrganizationFromLists = async (id: number) => {
     const queryString = `
-        DELETE FROM organization_list_has_organizations
+        DELETE FROM Organization_list_has_Organizations
         WHERE Organizations_id = ${id}
     `;
     return executeQuery(queryString);
