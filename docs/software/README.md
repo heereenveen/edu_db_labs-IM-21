@@ -1,7 +1,7 @@
 # Реалізація інформаційного та програмного забезпечення
 
 В рамках проекту розробляється:
-- ~~SQL-скрипт для створення на початкового наповнення бази даних~~
+- SQL-скрипт для створення на початкового наповнення бази даних
 - RESTfull сервіс для управління даними
 
 ## SQL-Скрипт для створення початкового наповнення бази даних
@@ -359,6 +359,322 @@ Insert into mydb.category (name, description, Post_id, Category_id) Values
 	('Abstract cat name2', 'abc description', 3, 2);
 ```
 
+## create webserver with Fastify from index.ts
 
-## RESTfull Сервіс для управління даними
-*У розробці...*
+```ts
+import fastify, { FastifyInstance } from 'fastify';
+import * as dotenv from 'dotenv';
+
+import organizationsRoutes from './routes/organizations';
+
+dotenv.config();
+const app: FastifyInstance = fastify();
+
+
+app.register(organizationsRoutes);
+
+app.listen({
+    port: parseInt(process.env.PORT!)
+}, (err: Error | null, address: string) => {
+    if(err)
+        return console.error(err);
+    console.log(`Server is running on ${address}`);
+});
+```
+
+
+## createPool from mysql.ts
+
+```ts
+const pool = mysql.createPool({
+    user:       "root",
+    password:   "password1234566qew",
+    database:   "mydb",
+    host:       "localhost"
+});
+```
+
+## all our controllers files for routes
+
+### organizationsDeleteByld.ts
+
+```ts
+import { FastifyReply, FastifyRequest } from "fastify";
+import { IIdParams } from "../types";
+import { deleteMySQLOrganization } from "../mysql";
+
+const organizationsDeleteHandle = async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as IIdParams;
+    if(!id)
+        return reply.code(400).send({ message: 'Id is not found' });
+    const data = await deleteMySQLOrganization(parseInt(id));
+    if(data.message)
+        return reply.code(500).send(data);
+    return reply.code(200).send(data);
+};
+
+export default organizationsDeleteHandle;
+```
+
+### organizationsDeleteFromList.ts
+
+```ts
+import { FastifyReply, FastifyRequest } from "fastify";
+import { IIdParams } from "../types";
+import { deleteMySQLOrganizationFromLists } from "../mysql";
+
+const organizationsDeleteFromListHandle = async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as IIdParams;
+    if(!id)
+        return reply.code(400).send({ message: 'Id is not found' });
+    const data = await deleteMySQLOrganizationFromLists(parseInt(id));
+    if(data.message)
+        return reply.code(500).send(data);
+    return reply.code(200).send(data);
+};
+
+export default organizationsDeleteFromListHandle;
+```
+
+### organizationsGetAll.ts
+
+```ts
+import { FastifyReply, FastifyRequest } from "fastify";
+import { getMySQLAllOrganizations } from "../mysql";
+
+const organizationsGetAllHandle = async (req: FastifyRequest, reply: FastifyReply) => {
+    const data = await getMySQLAllOrganizations();
+    if(data.message)
+        return reply.code(550).send(data);
+    return reply.code(200).send(data.res);
+};
+
+export default organizationsGetAllHandle;
+```
+
+### organizationsGetByld.ts
+
+```ts
+import { FastifyReply, FastifyRequest } from "fastify";
+import { getMySQLOrganization } from "../mysql";
+import { IIdParams } from "../types";
+
+const organizationsGetByIdHandle = async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as IIdParams;
+    if(!id || typeof id !== 'number')
+        return reply.code(400).send({ message: 'params.id is not valid' });
+    const data = await getMySQLOrganization(parseInt(id));
+    if(data.message)
+        return reply.code(500).send(data);
+    if(!data.res[0])
+        return reply.code(400).send({ message: 'no organization found' });
+    return reply.code(200).send(data.res[0]);
+};
+
+export default organizationsGetByIdHandle;
+```
+
+### organizationsGetList.ts
+
+```ts
+import { FastifyReply, FastifyRequest } from "fastify";
+import { getMySQLAllOrganizationsList } from "../mysql";
+
+const organizationsGetListHandle = async (req: FastifyRequest, reply: FastifyReply) => {
+    const data = await getMySQLAllOrganizationsList();
+    if(data.message)
+        return reply.code(550).send(data);
+    return reply.code(200).send(data.res);
+};
+
+export default organizationsGetListHandle;
+```
+
+### organizationsGetListByld.ts
+
+```ts
+import { FastifyReply, FastifyRequest } from "fastify";
+import { getMySQLOrganizationsList } from "../mysql";
+import { IIdParams } from "../types";
+
+const organizationsGetListByIdHandle = async (req: FastifyRequest, reply: FastifyReply) => {
+    const { id } = req.params as IIdParams;
+    if(!id || typeof id !== 'number')
+        return reply.code(400).send({ message: 'params.id is not valid' });
+    const data = await getMySQLOrganizationsList(parseInt(id));
+    if(data.message)
+        return reply.code(500).send(data);
+    if(!data.res[0])
+        return reply.code(400).send({ message: 'no list found' });
+    return reply.code(200).send(data.res);
+};
+
+export default organizationsGetListByIdHandle;
+```
+
+### organizationsPost.ts
+
+```ts
+import { FastifyReply, FastifyRequest } from "fastify";
+import { insertMySQLOrganization } from "../mysql";
+import { IPostParams } from "../types";
+import { ResultSetHeader } from "mysql2";
+
+const organizationsPostHandle = async (req: FastifyRequest, reply: FastifyReply) => {
+    const organizationParams = req.body as IPostParams;
+    if(!organizationParams.name)
+        return reply.code(400).send({ message: 'You should provide the name for organization' })
+    const data = await insertMySQLOrganization(organizationParams);
+    if(data.message)
+        return reply.code(500).send(data);
+    return reply.code(200).send({
+        ...organizationParams,
+        id: (data.res as ResultSetHeader).insertId
+    });
+};
+
+export default organizationsPostHandle;
+```
+
+### organizationsPutByld.ts
+
+```ts
+import { FastifyReply, FastifyRequest } from "fastify";
+import { insertMySQLOrganization } from "../mysql";
+import { IPostParams } from "../types";
+import { ResultSetHeader } from "mysql2";
+
+const organizationsPostHandle = async (req: FastifyRequest, reply: FastifyReply) => {
+    const organizationParams = req.body as IPostParams;
+    if(!organizationParams.name)
+        return reply.code(400).send({ message: 'You should provide the name for organization' })
+    const data = await insertMySQLOrganization(organizationParams);
+    if(data.message)
+        return reply.code(500).send(data);
+    return reply.code(200).send({
+        ...organizationParams,
+        id: (data.res as ResultSetHeader).insertId
+    });
+};
+
+export default organizationsPostHandle;
+```
+
+## our routes from organizations.ts
+
+```ts
+import { FastifyInstance } from "fastify";
+import {
+    organizationsGetAllOpts,
+    organizationsGetByIdOpts,
+    organizationsCreateOpts,
+    organizationsUpdateOpts,
+    organizationsDeleteOpts,
+    organizationsListGetAllOpts,
+    organizationsListGetByIdOpts,
+    organizationsDeleteFromListOpts
+} from "../schemas";
+
+
+const organizationsRoutes = (instance: FastifyInstance, options: any, done: any) => {
+    instance.get('/organizations', organizationsGetAllOpts);
+    instance.get('/organizations/:id', organizationsGetByIdOpts);
+
+    instance.post('/organizations', organizationsCreateOpts);
+
+    instance.put('/organizations/:id', organizationsUpdateOpts);
+
+    instance.delete('/organizations/:id', organizationsDeleteOpts);
+
+    instance.get('/organizationslist', organizationsListGetAllOpts);
+    instance.get('/organizationslist/:id', organizationsListGetByIdOpts);
+
+    instance.delete('/organizations/lists/:id', organizationsDeleteFromListOpts);
+    done();
+};
+
+export default organizationsRoutes; 
+```
+
+## execute queries from mysql.ts
+
+```ts
+const executeQuery = async (querStr: string) => {
+    try {
+        const [response] = await pool.query(querStr);
+        return {
+            res: response
+        };
+    } catch(error: any) {
+        return {
+            message: error.sqlMessage
+        };
+    };
+};
+```
+
+## all MySQL queries from mysql.ts
+
+```ts
+export const getMySQLAllOrganizations = async (): Promise<IMysqlReturn> => {
+    const queryString = `
+        SELECT * FROM organizations
+    `;
+    return executeQuery(queryString);
+};
+
+export const getMySQLAllOrganizationsList = async (): Promise<IMysqlReturn> => {
+    const queryString = `
+        SELECT * FROM organization_list
+    `;
+    return executeQuery(queryString);
+};
+
+export const getMySQLOrganizationsList = async (id: number): Promise<IMysqlReturn> => {
+    const queryString = `
+        SELECT * FROM organization_list_has_organizations
+        WHERE Organization_list_id = ${id}
+    `;
+    return executeQuery(queryString);
+};
+
+export const getMySQLOrganization = async (id: number): Promise<IMysqlReturn> => {
+    const queryString = `
+        SELECT * FROM organizations WHERE id = ${id}
+    `;
+    return executeQuery(queryString);
+};
+
+export const insertMySQLOrganization = async ({ name, description }: IPostParams) => {
+    const queryString = `
+        INSERT INTO organizations (name, description)
+        VALUES ('${name}', ${description ? `'${description}'` : null})
+    `;
+    return executeQuery(queryString);
+};
+
+export const updateMySQLOrganization = async ({ id, name, description }: IUpdateParamrs) => {
+    const queryString = `
+        UPDATE organizations
+        SET name = '${name}'${description ? `, description = '${description}'` : ''}
+        WHERE id = ${parseInt(id)}
+    `;
+    return executeQuery(queryString);
+};
+
+export const deleteMySQLOrganization = async (id: number) => {
+    const queryString = `
+        DELETE FROM organizations
+        WHERE id = ${id}
+    `;
+    return executeQuery(queryString);
+};
+
+export const deleteMySQLOrganizationFromLists = async (id: number) => {
+    const queryString = `
+        DELETE FROM organization_list_has_organizations
+        WHERE Organizations_id = ${id}
+    `;
+    return executeQuery(queryString);
+};
+```
