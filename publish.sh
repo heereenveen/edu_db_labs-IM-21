@@ -20,10 +20,10 @@ git commit -m 'deploy'
 # git push -f git@github.com:boldak/<USERNAME>.github.io.git master
 
 # # if you are deploying to https://<USERNAME>.github.io/<REPO>
-git push -f git@github.com:Dmutre/edu_db_labs-IM-21.git master:gh-pages
+# #git push -f git@github.com:heereenveen/edu_db_labs-IM-21.git master:gh-pages
 
 # if someone uses http request
-# git push -f https://github.com/Dmutre/edu_db_labs-IM-21.git master:gh-pages
+ git push -f https://github.com/heereenveen/edu_db_labs-IM-21.git master:gh-pages
 
 # if your default branch is main
 # git push -f git@github.com:Dmutre/edu_db_labs-IM-21.git main:gh-pages
